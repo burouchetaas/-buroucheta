@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//private/tmp/design_files/untitled/**)",
+      "Read(//private/tmp/design_files/**)",
+      "Bash(cp /tmp/design_files/untitled/project/fonts/* /Users/sergeeva/Claude/fonts/)",
+      "Bash(cp /tmp/design_files/untitled/project/assets/* /Users/sergeeva/Claude/assets/)"
+    ]
+  }
+}
