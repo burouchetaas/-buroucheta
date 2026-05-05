@@ -981,11 +981,8 @@ textarea.input { resize: vertical; min-height: 96px; line-height: 1.5; font-fami
 .bu-pickrow__photo {
   width: 56px; height: 56px;
   border-radius: 50%;
-  background: var(--olive-wash);
-  display: grid; place-items: center;
-  font-family: var(--font-display); font-weight: 500;
-  font-size: 18px; color: var(--olive-ink);
-  letter-spacing: .02em;
+  object-fit: cover;
+  object-position: top;
   flex: none;
 }
 .bu-pickrow__name {
@@ -2027,51 +2024,29 @@ function buildGoogleCalUrl({ specialist, date, hour, name, comment, contact }) {
   return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${fmt(start)}/${fmt(end)}&details=${details}&location=${location}`;
 }
 
-/* Portrait — illustrative SVG monogram (no fake photos) */
+/* Portrait — real photos */
 function Portrait({ who, size = 132, height }) {
   const h = height || size;
-  const grad = who === "anastasia"
-    ? ["#E5DFB8", "#BAAD52"]
-    : ["#F4F1DD", "#D9D6CB"];
-  const initials = who === "anastasia" ? "А.С." : "О.С.";
+  const src = who === "anastasia" ? "./assets/anastasia.JPG" : "./assets/olga.JPG";
   return (
-    <svg viewBox={`0 0 ${size} ${h}`} preserveAspectRatio="xMidYMid slice">
-      <defs>
-        <linearGradient id={`pg-${who}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={grad[0]} />
-          <stop offset="100%" stopColor={grad[1]} />
-        </linearGradient>
-      </defs>
-      <rect width={size} height={h} fill={`url(#pg-${who})`} />
-      {/* abstract figure silhouette */}
-      <circle cx={size/2} cy={h*0.38} r={size*0.18} fill="#2F2F2F" opacity=".10" />
-      <path
-        d={`M ${size*0.18} ${h} Q ${size*0.18} ${h*0.62}, ${size/2} ${h*0.62} Q ${size*0.82} ${h*0.62}, ${size*0.82} ${h} Z`}
-        fill="#2F2F2F" opacity=".10"
-      />
-      <text
-        x="50%" y="92%"
-        textAnchor="middle"
-        fontFamily='"Halvar Breit", "Helvetica Neue", sans-serif'
-        fontWeight="500"
-        fontSize={size*0.13}
-        letterSpacing=".06em"
-        fill="#2F2F2F"
-        opacity=".7"
-      >{initials}</text>
-    </svg>
+    <img
+      src={src}
+      alt={who === "anastasia" ? "Анастасия Сергеева" : "Ольга Смагина"}
+      style={{ width: size, height: h, objectFit: "cover", objectPosition: "top", display: "block" }}
+    />
   );
 }
 
-/* small avatar circle, initials only */
+/* small avatar circle */
 function MiniAvatar({ who, size = 56 }) {
-  const initials = who === "anastasia" ? "А.С." : "О.С.";
-  const bg = who === "anastasia" ? "#E5DFB8" : "#F4F1DD";
+  const src = who === "anastasia" ? "./assets/anastasia.JPG" : "./assets/olga.JPG";
   return (
-    <div
+    <img
+      src={src}
+      alt={who === "anastasia" ? "Анастасия Сергеева" : "Ольга Смагина"}
       className="bu-pickrow__photo"
-      style={{ background: bg, width: size, height: size, fontSize: size*0.28 }}
-    >{initials}</div>
+      style={{ width: size, height: size, objectFit: "cover", objectPosition: "top", borderRadius: "50%" }}
+    />
   );
 }
 
