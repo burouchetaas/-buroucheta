@@ -596,6 +596,21 @@ textarea.input { resize: vertical; min-height: 96px; line-height: 1.5; font-fami
   color: var(--fg-2);
   margin: 14px 0 0;
 }
+.bu-specialist__creds {
+  list-style: none; padding: 0; margin: 12px 0 0;
+  display: flex; flex-direction: column; gap: 5px;
+}
+.bu-specialist__cred {
+  display: flex; align-items: flex-start; gap: 7px;
+  font-size: 12px; line-height: 1.4; color: var(--olive-ink);
+  font-family: var(--font-body);
+}
+.bu-specialist__cred::before {
+  content: "—";
+  color: var(--olive);
+  flex: none;
+  font-family: var(--font-display);
+}
 .bu-specialist__meta {
   display: flex; flex-direction: column; gap: 6px;
   margin: 20px 0 0;
@@ -1929,12 +1944,17 @@ const SPECIALISTS = [
   {
     id: "anastasia",
     name: "Анастасия Сергеева",
-    role: "Основатель Бюроучета.рф · налоговый эксперт",
-    bio: "Налоговая оптимизация, споры с ФНС, постановка учёта с нуля",
+    role: "Основатель · главный бухгалтер",
+    bio: "19 лет в налогах и бухучёте. Постановка учёта с нуля, налоговая оптимизация, споры с ФНС — сложные ситуации, где цена ошибки высока.",
+    credentials: [
+      "Член Союза бухгалтеров и налоговых консультантов России",
+      "Спикер и член жюри «Школы молодого предпринимателя»",
+      "Проект Фонда развития бизнеса Краснодарского края",
+    ],
     expYears: 19,
     cert: "Аттестат № 14-021",
     pricePerHour: 15000,
-    workHours: { start: 14, end: 16 },        // 14:00–16:00 будни
+    workHours: { start: 14, end: 16 },
     initials: "АС",
     nextSlot: "Выбрать в календаре",
     portrait: "anastasia",
@@ -1942,12 +1962,17 @@ const SPECIALISTS = [
   {
     id: "olga",
     name: "Ольга Смагина",
-    role: "Эксперт по налогам · бухгалтер-консультант",
-    bio: "Малый бизнес, ИП, маркетплейсы, кадровый учёт, работа с самозанятыми, расчет налоговой нагрузки",
+    role: "Эксперт · бухгалтер-консультант",
+    bio: "15 лет практики в любой сфере учёта и налогообложения. Сопровождение налоговых проверок, проверок контролирующих органов, малый бизнес и ИП.",
+    credentials: [
+      "Опыт прохождения проверок ФНС, ПФР, ФСС",
+      "Маркетплейсы, самозанятые, кадровый учёт",
+      "Расчёт и оптимизация налоговой нагрузки",
+    ],
     expYears: 15,
     cert: "Аттестат № 19-114",
     pricePerHour: 10000,
-    workHours: { start: 9, end: 18 },         // 9:00–18:00 будни
+    workHours: { start: 9, end: 18 },
     initials: "ОС",
     nextSlot: "Выбрать в календаре",
     portrait: "olga",
@@ -2100,9 +2125,9 @@ function Hero({ onBook, size = "default" }) {
             <em>цифрах</em> за&nbsp;час.
           </h1>
           <p className="bu-hero__lead">
-            Один созвон с&nbsp;налоговым экспертом — и&nbsp;вы уйдёте
-            с&nbsp;понятным планом действий по&nbsp;налогам, учёту
-            и&nbsp;кадрам. 
+            Один час с&nbsp;аттестованным экспертом — и&nbsp;вы точно знаете,
+            что делать с&nbsp;налогами, учётом и&nbsp;ФНС.
+            Конкретные шаги, без&nbsp;воды.
           </p>
           <div className="bu-hero__actions">
             <button className="btn btn--ink btn--lg" onClick={onBook}>
@@ -2122,8 +2147,8 @@ function Hero({ onBook, size = "default" }) {
               <div className="bu-hero__bullet-l">Выбрать специалиста и время — встреча в&nbsp;календаре</div>
             </div>
             <div className="bu-hero__bullet">
-              <div className="bu-hero__bullet-n">15&nbsp;лет</div>
-              <div className="bu-hero__bullet-l">Cредний опыт наших экспертов в&nbsp;бухгалтерии и&nbsp;налогах</div>
+              <div className="bu-hero__bullet-n">17&nbsp;лет</div>
+              <div className="bu-hero__bullet-l">Средний опыт наших специалистов в&nbsp;бухгалтерии и&nbsp;налогах</div>
             </div>
           </div>
         </div>
@@ -2176,6 +2201,13 @@ function Specialists({ onBook }) {
               <p className="bu-specialist__role">{s.role}</p>
               <h3 className="bu-specialist__name">{s.name}</h3>
               <p className="bu-specialist__bio">{s.bio}</p>
+              {s.credentials && (
+                <ul className="bu-specialist__creds">
+                  {s.credentials.map((cred, i) => (
+                    <li key={i} className="bu-specialist__cred">{cred}</li>
+                  ))}
+                </ul>
+              )}
               <div className="bu-specialist__meta">
                 <div className="bu-specialist__meta-row">
                   <span className="bu-specialist__meta-l">Опыт</span>
