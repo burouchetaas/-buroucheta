@@ -12,8 +12,14 @@ const CALENDARS = {
 };
 
 const WORK_HOURS = {
-  anastasia: { start: 14, end: 16 },  // МСК
-  olga:      { start: 9,  end: 18 }   // МСК
+  anastasia: { start: 14, end: 16 },  // МСК, каждый будний день
+  olga: {                              // МСК, по дням (1=Пн..5=Пт)
+    1: { start: 9,  end: 18 },  // Пн
+    2: { start: 12, end: 18 },  // Вт
+    3: { start: 9,  end: 13 },  // Ср
+    4: { start: 9,  end: 18 },  // Чт
+    5: { start: 9,  end: 17 }   // Пт
+  }
 };
 
 const TZ = '+03:00'; // Москва UTC+3
@@ -35,9 +41,16 @@ function doGet(e) {
 }
 
 // ── Возвращает свободные часы на дату ────────────────
+function getWorkHoursForDay(whConfig, dateStr) {
+  if (whConfig.start !== undefined) return whConfig; // простой формат
+  const dayOfWeek = new Date(dateStr + 'T12:00:00' + TZ).getDay(); // 0=Вс,1=Пн..6=Сб
+  return whConfig[dayOfWeek] || null; // null = нет приёма в этот день
+}
+
 function getSlots(specialist, dateStr) {
   if (!CALENDARS[specialist]) return { error: 'unknown specialist' };
-  const wh  = WORK_HOURS[specialist];
+  const wh = getWorkHoursForDay(WORK_HOURS[specialist], dateStr);
+  if (!wh) return { slots: [] }; // нет приёма в этот день
   const cal = CalendarApp.getCalendarById(CALENDARS[specialist]);
 
   const dayStart = new Date(dateStr + 'T00:00:00' + TZ);

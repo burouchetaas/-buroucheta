@@ -1971,7 +1971,7 @@ const SPECIALISTS = [
     expYears: 15,
     cert: "Аттестат № 19-114",
     pricePerHour: 10000,
-    workHours: { start: 9, end: 18 },
+    workHours: { 1:{start:9,end:18}, 2:{start:12,end:18}, 3:{start:9,end:13}, 4:{start:9,end:18}, 5:{start:9,end:17} },
     initials: "ОС",
     nextSlot: "Выбрать в календаре",
     portrait: "olga",
@@ -1987,8 +1987,10 @@ async function fetchSlots(specialistId, dateStr) {
   if (!APPS_SCRIPT_URL) {
     const sp = SPECIALISTS.find(x => x.id === specialistId);
     if (!sp) return [];
+    const wh = getDayHours(sp.workHours, dateStr);
+    if (!wh) return [];
     const out = [];
-    for (let h = sp.workHours.start; h < sp.workHours.end; h++) out.push(h);
+    for (let h = wh.start; h < wh.end; h++) out.push(h);
     return out;
   }
   const url = APPS_SCRIPT_URL + "?action=slots&specialist=" + specialistId + "&date=" + dateStr;
@@ -1999,8 +2001,10 @@ async function fetchSlots(specialistId, dateStr) {
   } catch (e) {
     const sp = SPECIALISTS.find(x => x.id === specialistId);
     if (!sp) return [];
+    const wh = getDayHours(sp.workHours, dateStr);
+    if (!wh) return [];
     const out = [];
-    for (let h = sp.workHours.start; h < sp.workHours.end; h++) out.push(h);
+    for (let h = wh.start; h < wh.end; h++) out.push(h);
     return out;
   }
 }
@@ -2019,10 +2023,17 @@ async function bookOnCalendar({ specialist, date, hour, form }) {
   } catch (e) { console.error("bookOnCalendar", e); }
 }
 
+function getDayHours(workHours, dateStr) {
+  if (workHours.start !== undefined) return workHours;
+  const day = new Date(dateStr + "T12:00:00").getDay(); // 0=Sun,1=Mon..6=Sat
+  return workHours[day] || null;
+}
+
 function generateSlots(specialist, dateStr) {
-  const { start, end } = specialist.workHours;
+  const wh = getDayHours(specialist.workHours, dateStr);
+  if (!wh) return [];
   const slots = [];
-  for (let h = start; h < end; h++) {
+  for (let h = wh.start; h < wh.end; h++) {
     slots.push({
       hour: h,
       label: `${String(h).padStart(2, "0")}:00`,
@@ -2115,7 +2126,7 @@ function Star({ size = 14 }) {
   );
 }
 
-Object.assign(window, { SPECIALISTS, APPS_SCRIPT_URL, generateSlots, fetchSlots, bookOnCalendar, fmtPrice, fmtDate, pad2, isWeekend, buildGoogleCalUrl, Portrait, MiniAvatar, Star, isSlotBusy });
+Object.assign(window, { SPECIALISTS, APPS_SCRIPT_URL, generateSlots, getDayHours, fetchSlots, bookOnCalendar, fmtPrice, fmtDate, pad2, isWeekend, buildGoogleCalUrl, Portrait, MiniAvatar, Star, isSlotBusy });
 
   </script>
   <script type="text/babel">
@@ -2248,7 +2259,9 @@ function Specialists({ onBook }) {
                 <div className="bu-specialist__meta-row">
                   <span className="bu-specialist__meta-l">Часы</span>
                   <span className="bu-specialist__meta-v">
-                    {pad2(s.workHours.start)}:00–{pad2(s.workHours.end)}:00 · будни
+                    {s.workHours.start !== undefined
+                      ? `${pad2(s.workHours.start)}:00–${pad2(s.workHours.end)}:00 · будни`
+                      : "Пн–13:00, Вт–12:00, Ср до 13:00, Чт–18:00, Пт до 17:00"}
                   </span>
                 </div>
 
@@ -2647,7 +2660,7 @@ function BookingStepSpecialist({ specialistId, onPick }) {
             </div>
             <div>
               <div className="bu-pickrow__price">{fmtPrice(s.pricePerHour)}</div>
-              <div className="bu-pickrow__price-l">за час · {pad2(s.workHours.start)}:00–{pad2(s.workHours.end)}:00</div>
+              <div className="bu-pickrow__price-l">за час · {s.workHours.start !== undefined ? `${pad2(s.workHours.start)}:00–${pad2(s.workHours.end)}:00` : "по расписанию"}</div>
             </div>
             <div className="bu-pickrow__radio"/>
           </button>
@@ -2667,9 +2680,10 @@ function BookingStepWhen({ specialist, today, viewMonth, setViewMonth, date, set
     const iso = fmtDate(date).iso;
     fetchSlots(specialist.id, iso)
       .then(freeHours => {
-        const { start, end } = specialist.workHours;
+        const wh = getDayHours(specialist.workHours, iso);
+        if (!wh) { setSlots([]); return; }
         const list = [];
-        for (let h = start; h < end; h++) {
+        for (let h = wh.start; h < wh.end; h++) {
           list.push({ hour: h, label: pad2(h) + ":00", busy: !freeHours.includes(h) });
         }
         setSlots(list);
@@ -2698,9 +2712,10 @@ function BookingStepWhen({ specialist, today, viewMonth, setViewMonth, date, set
       <span className="eyebrow">Шаг 02 · Дата и время</span>
       <h2 className="bu-modal__h">Когда вам удобно?</h2>
       <p className="bu-modal__sub">
-        Часы&nbsp;{specialist.name.split(" ")[0]} —{" "}
-        {pad2(specialist.workHours.start)}:00–{pad2(specialist.workHours.end)}:00,
-        будни. Серым&nbsp;— уже занятые окна.
+        {specialist.workHours.start !== undefined
+          ? <>Часы&nbsp;{specialist.name.split(" ")[0]} — {pad2(specialist.workHours.start)}:00–{pad2(specialist.workHours.end)}:00, будни.</>
+          : <>Расписание&nbsp;{specialist.name.split(" ")[0]}: Пн 9–18, Вт 12–18, Ср 9–13, Чт 9–18, Пт 9–17.</>
+        } Серым&nbsp;— уже занятые окна.
       </p>
 
       <div className="bu-modal__section bu-cal">
