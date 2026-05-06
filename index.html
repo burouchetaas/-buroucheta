@@ -1981,10 +1981,10 @@ const SPECIALISTS = [
 /* deterministic pseudo-busy slots so the calendar feels real */
 // ── Google Apps Script URL ──────────────────────────────
 // После публикации Apps Script вставьте URL сюда:
-const APPS_SCRIPT_URL = "PASTE_YOUR_APPS_SCRIPT_URL_HERE";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwPp5Z-f9ihMNNlmpaASgxeGSAE5zJsj1MR_slXs3gqWQ8pZtzmb6aFEG9YtMGGIxj6/exec";
 
 async function fetchSlots(specialistId, dateStr) {
-  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === "PASTE_YOUR_APPS_SCRIPT_URL_HERE") {
+  if (!APPS_SCRIPT_URL) {
     const sp = SPECIALISTS.find(x => x.id === specialistId);
     if (!sp) return [];
     const out = [];
@@ -2006,7 +2006,7 @@ async function fetchSlots(specialistId, dateStr) {
 }
 
 async function bookOnCalendar({ specialist, date, hour, form }) {
-  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === "PASTE_YOUR_APPS_SCRIPT_URL_HERE") return;
+  if (!APPS_SCRIPT_URL) return;
   const iso = fmtDate(date).iso;
   const params = new URLSearchParams({
     action: "book", specialist: specialist.id,
