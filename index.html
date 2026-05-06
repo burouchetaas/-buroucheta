@@ -1979,12 +1979,44 @@ const SPECIALISTS = [
 ];
 
 /* deterministic pseudo-busy slots so the calendar feels real */
-function isSlotBusy(specialistId, dateStr, hour) {
-  // simple hash
-  const s = specialistId + dateStr + hour;
-  let h = 0;
-  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
-  return Math.abs(h) % 7 < 2; // ~28% busy
+// ── Google Apps Script URL ──────────────────────────────
+// После публикации Apps Script вставьте URL сюда:
+const APPS_SCRIPT_URL = "PASTE_YOUR_APPS_SCRIPT_URL_HERE";
+
+async function fetchSlots(specialistId, dateStr) {
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === "PASTE_YOUR_APPS_SCRIPT_URL_HERE") {
+    const sp = SPECIALISTS.find(x => x.id === specialistId);
+    if (!sp) return [];
+    const out = [];
+    for (let h = sp.workHours.start; h < sp.workHours.end; h++) out.push(h);
+    return out;
+  }
+  const url = APPS_SCRIPT_URL + "?action=slots&specialist=" + specialistId + "&date=" + dateStr;
+  try {
+    const res = await fetch(url, { redirect: "follow" });
+    const data = await res.json();
+    return Array.isArray(data.slots) ? data.slots : [];
+  } catch (e) {
+    const sp = SPECIALISTS.find(x => x.id === specialistId);
+    if (!sp) return [];
+    const out = [];
+    for (let h = sp.workHours.start; h < sp.workHours.end; h++) out.push(h);
+    return out;
+  }
+}
+
+async function bookOnCalendar({ specialist, date, hour, form }) {
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === "PASTE_YOUR_APPS_SCRIPT_URL_HERE") return;
+  const iso = fmtDate(date).iso;
+  const params = new URLSearchParams({
+    action: "book", specialist: specialist.id,
+    date: iso, hour: String(hour),
+    name: form.name, phone: form.phone || "",
+    telegram: form.tg || "", comment: form.comment || ""
+  });
+  try {
+    await fetch(APPS_SCRIPT_URL + "?" + params.toString(), { redirect: "follow" });
+  } catch (e) { console.error("bookOnCalendar", e); }
 }
 
 function generateSlots(specialist, dateStr) {
@@ -2083,7 +2115,7 @@ function Star({ size = 14 }) {
   );
 }
 
-Object.assign(window, { SPECIALISTS, generateSlots, fmtPrice, fmtDate, pad2, isWeekend, buildGoogleCalUrl, Portrait, MiniAvatar, Star, isSlotBusy });
+Object.assign(window, { SPECIALISTS, APPS_SCRIPT_URL, generateSlots, fetchSlots, bookOnCalendar, fmtPrice, fmtDate, pad2, isWeekend, buildGoogleCalUrl, Portrait, MiniAvatar, Star, isSlotBusy });
 
   </script>
   <script type="text/babel">
@@ -2490,7 +2522,6 @@ function BookingModal({ open, onClose, initialSpecialistId, mode = "modal" }) {
 
   const specialist = SPECIALISTS.find((s) => s.id === specialistId);
   const dateMeta = date ? fmtDate(date) : null;
-  const slots = (date && specialist) ? generateSlots(specialist, dateMeta.iso) : [];
 
   const canNext =
     (step === 0 && !!specialist) ||
@@ -2543,7 +2574,6 @@ function BookingModal({ open, onClose, initialSpecialistId, mode = "modal" }) {
               setViewMonth={setViewMonth}
               date={date} setDate={setDate}
               hour={hour} setHour={setHour}
-              slots={slots}
               dateMeta={dateMeta}
             />
           )}
@@ -2575,7 +2605,10 @@ function BookingModal({ open, onClose, initialSpecialistId, mode = "modal" }) {
                 onClick={async () => {
                   if (step === 2) {
                     setSubmitting(true);
-                    await sendToBitrix24({ specialist, date, hour, form });
+                    await Promise.all([
+                      sendToBitrix24({ specialist, date, hour, form }),
+                      bookOnCalendar({ specialist, date, hour, form })
+                    ]);
                     setSubmitting(false);
                     setStep(3);
                   } else {
@@ -2625,7 +2658,25 @@ function BookingStepSpecialist({ specialistId, onPick }) {
 }
 
 /* ---------- STEP 1: Date & Time ---------- */
-function BookingStepWhen({ specialist, today, viewMonth, setViewMonth, date, setDate, hour, setHour, slots, dateMeta }) {
+function BookingStepWhen({ specialist, today, viewMonth, setViewMonth, date, setDate, hour, setHour, dateMeta }) {
+  const [slots, setSlots] = React.useState([]);
+  const [slotsLoading, setSlotsLoading] = React.useState(false);
+  React.useEffect(() => {
+    if (!date || !specialist) { setSlots([]); return; }
+    setSlotsLoading(true);
+    const iso = fmtDate(date).iso;
+    fetchSlots(specialist.id, iso)
+      .then(freeHours => {
+        const { start, end } = specialist.workHours;
+        const list = [];
+        for (let h = start; h < end; h++) {
+          list.push({ hour: h, label: pad2(h) + ":00", busy: !freeHours.includes(h) });
+        }
+        setSlots(list);
+      })
+      .catch(() => setSlots([]))
+      .finally(() => setSlotsLoading(false));
+  }, [date, specialist && specialist.id]);
   // build calendar grid for viewMonth
   const year = viewMonth.getFullYear();
   const month = viewMonth.getMonth();
@@ -2702,7 +2753,9 @@ function BookingStepWhen({ specialist, today, viewMonth, setViewMonth, date, set
             </div>
           </div>
           {date ? (
-            slots.length ? (
+            slotsLoading ? (
+              <div className="bu-slots__empty">Загружаем свободные окна…</div>
+            ) : slots.length ? (
               <div className="bu-slots__list">
                 {slots.map((s) => (
                   <button
@@ -2983,13 +3036,15 @@ Object.assign(window, { BookingModal, BookingStepWhen, BookingStepContact, Booki
 
       const specialist = SPECIALISTS.find((s) => s.id === specialistId);
       const dateMeta = date ? fmtDate(date) : null;
-      const slots = (date && specialist) ? generateSlots(specialist, dateMeta.iso) : [];
       const valid = !!date && hour != null && form.name.trim() && (form.phone.trim() || form.tg.trim()) && form.consent;
       const [submitting, setSubmitting] = React.useState(false);
   const submit = async () => {
     if (!valid || submitting) return;
     setSubmitting(true);
-    await sendToBitrix24({ specialist, date, hour, form });
+    await Promise.all([
+      sendToBitrix24({ specialist, date, hour, form }),
+      bookOnCalendar({ specialist, date, hour, form })
+    ]);
     setSubmitting(false);
     setConfirmed(true);
   };
@@ -3040,7 +3095,7 @@ Object.assign(window, { BookingModal, BookingStepWhen, BookingStepContact, Booki
 
               <div>
                 <label className="field__label" style={{display:"block", marginBottom:12}}>02 · Дата и время</label>
-                <BookingStepWhen specialist={specialist} today={today} viewMonth={viewMonth} setViewMonth={setViewMonth} date={date} setDate={setDate} hour={hour} setHour={setHour} slots={slots} dateMeta={dateMeta}/>
+                <BookingStepWhen specialist={specialist} today={today} viewMonth={viewMonth} setViewMonth={setViewMonth} date={date} setDate={setDate} hour={hour} setHour={setHour} dateMeta={dateMeta}/>
               </div>
 
               <div>
