@@ -1944,12 +1944,11 @@ const SPECIALISTS = [
   {
     id: "anastasia",
     name: "Анастасия Сергеева",
-    role: "Основатель · главный бухгалтер",
+    role: "Основатель · владелец компании",
     bio: "19 лет в налогах и бухучёте. Постановка учёта с нуля, налоговая оптимизация, споры с ФНС — сложные ситуации, где цена ошибки высока.",
     credentials: [
       "Член Союза бухгалтеров и налоговых консультантов России",
-      "Спикер и член жюри «Школы молодого предпринимателя»",
-      "Проект Фонда развития бизнеса Краснодарского края",
+      "Спикер и член жюри «Школы молодого предпринимателя» при поддержке Фонда развития бизнеса Краснодарского края",
     ],
     expYears: 19,
     cert: "Аттестат № 14-021",
@@ -1962,7 +1961,7 @@ const SPECIALISTS = [
   {
     id: "olga",
     name: "Ольга Смагина",
-    role: "Эксперт · бухгалтер-консультант",
+    role: "Налоговый эксперт · бухгалтер - консультант",
     bio: "15 лет практики в любой сфере учёта и налогообложения. Сопровождение налоговых проверок, проверок контролирующих органов, малый бизнес и ИП.",
     credentials: [
       "Опыт прохождения проверок ФНС, ПФР, ФСС",
@@ -2433,6 +2432,37 @@ Object.assign(window, { Header, Hero, Specialists, Included, Reviews, MetaBand, 
 
 const { useState, useMemo, useEffect } = React;
 
+async function sendToBitrix24({ specialist, date, hour, form }) {
+  const months = ["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
+  const dateStr = date ? `${date.getDate()} ${months[date.getMonth()]}` : "—";
+  const timeStr = hour != null ? `${String(hour).padStart(2,"0")}:00` : "—";
+  const fields = {
+    TITLE: `Запись · ${specialist.name} · ${dateStr} ${timeStr}`,
+    NAME: form.name,
+    SOURCE_ID: "WEB",
+    SOURCE_DESCRIPTION: "Сайт Бюроучета.рф — форма записи на консультацию",
+    COMMENTS: [
+      `Специалист: ${specialist.name}`,
+      `Дата и время: ${dateStr} в ${timeStr}`,
+      `Телефон: ${form.phone || "—"}`,
+      `Telegram: ${form.tg || "—"}`,
+      `Комментарий клиента: ${form.comment || "—"}`,
+    ].join("\n"),
+  };
+  if (form.phone) fields.PHONE = [{ VALUE: form.phone, VALUE_TYPE: "WORK" }];
+  try {
+    const r = await fetch(
+      "https://buroucheta.bitrix24.ru/rest/1/wiy3yl4rurdhjmhu/crm.lead.add.json",
+      { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ fields }) }
+    );
+    const d = await r.json();
+    return d.result || null;
+  } catch (e) {
+    console.error("Bitrix24:", e);
+    return null;
+  }
+}
+
 function BookingModal({ open, onClose, initialSpecialistId, mode = "modal" }) {
   const [step, setStep] = useState(0); // 0 specialist, 1 date+time, 2 contact, 3 confirm
   const [specialistId, setSpecialistId] = useState(initialSpecialistId || SPECIALISTS[0].id);
@@ -2441,6 +2471,7 @@ function BookingModal({ open, onClose, initialSpecialistId, mode = "modal" }) {
   const [date, setDate] = useState(null);
   const [hour, setHour] = useState(null);
   const [form, setForm] = useState({ name: "", phone: "", tg: "", comment: "", consent: false });
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (open && initialSpecialistId) {
@@ -2542,10 +2573,19 @@ function BookingModal({ open, onClose, initialSpecialistId, mode = "modal" }) {
               </button>
               <button
                 className="btn btn--ink btn--lg"
-                disabled={!canNext}
-                onClick={() => setStep(step + 1)}
+                disabled={!canNext || submitting}
+                onClick={async () => {
+                  if (step === 2) {
+                    setSubmitting(true);
+                    await sendToBitrix24({ specialist, date, hour, form });
+                    setSubmitting(false);
+                    setStep(3);
+                  } else {
+                    setStep(step + 1);
+                  }
+                }}
               >
-                {step === 2 ? "Записаться" : "Далее"}
+                {submitting ? "Отправляем…" : step === 2 ? "Записаться" : "Далее"}
               </button>
             </div>
           )}
@@ -2947,7 +2987,14 @@ Object.assign(window, { BookingModal, BookingStepWhen, BookingStepContact, Booki
       const dateMeta = date ? fmtDate(date) : null;
       const slots = (date && specialist) ? generateSlots(specialist, dateMeta.iso) : [];
       const valid = !!date && hour != null && form.name.trim() && (form.phone.trim() || form.tg.trim()) && form.consent;
-      const submit = () => { if (!valid) return; setConfirmed(true); };
+      const [submitting, setSubmitting] = React.useState(false);
+  const submit = async () => {
+    if (!valid || submitting) return;
+    setSubmitting(true);
+    await sendToBitrix24({ specialist, date, hour, form });
+    setSubmitting(false);
+    setConfirmed(true);
+  };
 
       if (confirmed) {
         return (
