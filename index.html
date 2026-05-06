@@ -2785,7 +2785,7 @@ function BookingStepContact({ specialist, date, hour, form, setForm }) {
           <label className="checkbox">
             <input type="checkbox" checked={form.consent} onChange={(e) => setForm((f) => ({...f, consent: e.target.checked}))}/>
             <span className="checkbox__box"/>
-            <span>Согласен на обработку персональных данных в&nbsp;соответствии с&nbsp;<a href="#">политикой</a>. Данные используем только для&nbsp;связи и&nbsp;записи на&nbsp;встречу.</span>
+            <span>Согласен с <a href="https://buroucheta.bitrix24.ru/pub/imol.php?id=2&sec=kyoige&user_lang=ru" target="_blank" rel="noopener">согласием на обработку&nbsp;персональных данных</a> и&nbsp;<a href="https://бюроучета.рф/privacy" target="_blank" rel="noopener">политикой конфиденциальности</a>.</span>
           </label>
         </div>
       </div>
@@ -3071,7 +3071,7 @@ Object.assign(window, { BookingModal, BookingStepWhen, BookingStepContact, Booki
                     <label className="checkbox">
                       <input type="checkbox" checked={form.consent} onChange={(e)=>setForm({...form, consent:e.target.checked})}/>
                       <span className="checkbox__box"/>
-                      <span>Согласен на&nbsp;обработку персональных данных. Используем их&nbsp;только для&nbsp;записи.</span>
+                      <span>Согласен с <a href="https://buroucheta.bitrix24.ru/pub/imol.php?id=2&sec=kyoige&user_lang=ru" target="_blank" rel="noopener">согласием на обработку&nbsp;персональных данных</a> и&nbsp;<a href="https://бюроучета.рф/privacy" target="_blank" rel="noopener">политикой конфиденциальности</a>.</span>
                     </label>
                   </div>
                 </div>
