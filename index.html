@@ -1409,14 +1409,14 @@ textarea.input { resize: vertical; min-height: 96px; line-height: 1.5; font-fami
   .bu-specialists__head { gap: 16px; margin-bottom: 32px; }
 
   .bu-specialist {
-    grid-template-columns: 80px 1fr;
-    gap: 16px;
+    grid-template-columns: 1fr;
+    gap: 0;
     padding: 20px;
   }
-  .bu-specialist__photo { width: 80px; height: 104px; }
+  .bu-specialist__photo { width: 120px; height: 152px; margin: 0 auto 20px; }
   .bu-specialist__name  { font-size: 20px; }
   .bu-specialist__price { flex-direction: column; gap: 2px; }
-  .bu-specialist__price-num { font-size: 26px; white-space: nowrap; }
+  .bu-specialist__price-num { font-size: 20px; white-space: nowrap; }
 
   /* ── Included ──────────────────────────────────────────── */
   .bu-included { padding-bottom: 56px; }
@@ -1944,7 +1944,7 @@ const SPECIALISTS = [
   {
     id: "anastasia",
     name: "Анастасия Сергеева",
-    role: "Основатель · владелец компании",
+    role: "Налоговый эксперт · основатель компании",
     bio: "19 лет в налогах и бухучёте. Постановка учёта с нуля, налоговая оптимизация, споры с ФНС — сложные ситуации, где цена ошибки высока.",
     credentials: [
       "Член Союза бухгалтеров и налоговых консультантов России",
@@ -2185,6 +2185,7 @@ function Specialists({ onBook }) {
         </div>
         <p className="bu-specialists__sub">
           Анастасия — для собственников и&nbsp;комплексных вопросов. 
+          
           Ольга&nbsp;— для&nbsp;ИП,
           маркетплейсов и&nbsp;текущей бухгалтерской рутины. Выбирайте по&nbsp;ситуации.
         </p>
@@ -2218,10 +2219,7 @@ function Specialists({ onBook }) {
                     {pad2(s.workHours.start)}:00–{pad2(s.workHours.end)}:00 · будни
                   </span>
                 </div>
-                <div className="bu-specialist__meta-row">
-                  <span className="bu-specialist__meta-l">Ближайшее окно</span>
-                  <span className="bu-specialist__meta-v">{s.nextSlot}</span>
-                </div>
+
               </div>
               <div className="bu-specialist__price">
                 <span className="bu-specialist__price-num">{fmtPrice(s.pricePerHour)}</span>
@@ -2231,7 +2229,7 @@ function Specialists({ onBook }) {
                 className="btn btn--outline bu-specialist__cta"
                 onClick={() => onBook(s.id)}
               >
-                Выбрать {s.name.split(" ")[0]}
+                Выбрать
               </button>
             </div>
           </article>
