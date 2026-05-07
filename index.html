@@ -2737,7 +2737,7 @@ function BookingStepWhen({ specialist, today, viewMonth, setViewMonth, date, set
           <div className="bu-cal__grid">
             {cells.map((d, i) => {
               if (!d) return <div key={i} className="bu-cal__day bu-cal__day--empty"/>;
-              const past = d < today;
+              const past = d <= today;
               const off = isWeekend(d);
               const isToday = d.getTime() === today.getTime();
               const isActive = date && d.getTime() === date.getTime();
