@@ -416,17 +416,17 @@ textarea.input { resize: vertical; min-height: 96px; line-height: 1.5; font-fami
    ============================================================ */
 .bu-hero {
   position: relative;
-  padding: 120px 56px 140px;
+  padding: 80px 56px 100px;
   max-width: 1240px;
   margin: 0 auto;
 }
-.bu-hero--compact { padding: 80px 56px 96px; }
-.bu-hero--tall    { padding: 160px 56px 180px; }
+.bu-hero--compact { padding: 56px 56px 72px; }
+.bu-hero--tall    { padding: 120px 56px 140px; }
 
 .bu-hero__inner {
   display: grid;
   grid-template-columns: 1.4fr 1fr;
-  gap: 80px;
+  gap: 56px;
   align-items: end;
 }
 .bu-hero__title {
@@ -531,16 +531,16 @@ textarea.input { resize: vertical; min-height: 96px; line-height: 1.5; font-fami
    SPECIALISTS
    ============================================================ */
 .bu-specialists {
-  padding: 120px 56px;
+  padding: 80px 56px;
   max-width: 1240px;
   margin: 0 auto;
 }
 .bu-specialists__head {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 80px;
+  gap: 48px;
   align-items: end;
-  margin-bottom: 64px;
+  margin-bottom: 40px;
 }
 .bu-specialists__title {
   font-family: var(--font-display); font-weight: 500;
@@ -666,16 +666,16 @@ textarea.input { resize: vertical; min-height: 96px; line-height: 1.5; font-fami
    PRICING / WHAT'S INCLUDED
    ============================================================ */
 .bu-included {
-  padding: 0 56px 120px;
+  padding: 0 56px 80px;
   max-width: 1240px;
   margin: 0 auto;
 }
 .bu-included__inner {
   background: var(--olive-wash);
-  padding: 64px;
+  padding: 48px;
   display: grid;
   grid-template-columns: 1fr 1.2fr;
-  gap: 80px;
+  gap: 56px;
   align-items: start;
 }
 .bu-included__title {
@@ -720,7 +720,7 @@ textarea.input { resize: vertical; min-height: 96px; line-height: 1.5; font-fami
    REVIEWS
    ============================================================ */
 .bu-reviews {
-  padding: 0 56px 120px;
+  padding: 0 56px 80px;
   max-width: 1240px;
   margin: 0 auto;
 }
@@ -803,12 +803,12 @@ textarea.input { resize: vertical; min-height: 96px; line-height: 1.5; font-fami
    FAQ / META BAND
    ============================================================ */
 .bu-meta {
-  padding: 96px 56px;
+  padding: 64px 56px;
   max-width: 1240px;
   margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr 2fr;
-  gap: 80px;
+  gap: 56px;
   border-top: 1px solid var(--line);
 }
 .bu-meta__title {
@@ -1312,7 +1312,7 @@ textarea.input { resize: vertical; min-height: 96px; line-height: 1.5; font-fami
    Booking inline (single-page flow)
    ============================================================ */
 .bu-booking {
-  padding: 0 56px 120px;
+  padding: 0 56px 80px;
   max-width: 1240px;
   margin: 0 auto;
 }
@@ -1399,9 +1399,9 @@ textarea.input { resize: vertical; min-height: 96px; line-height: 1.5; font-fami
   .bu-header__phone { display: none; }
 
   /* ── Hero ──────────────────────────────────────────────── */
-  .bu-hero         { padding-top: 48px;  padding-bottom: 56px; }
-  .bu-hero--compact { padding-top: 32px; padding-bottom: 40px; }
-  .bu-hero--tall   { padding-top: 64px;  padding-bottom: 72px; }
+  .bu-hero         { padding-top: 32px;  padding-bottom: 40px; }
+  .bu-hero--compact { padding-top: 24px; padding-bottom: 32px; }
+  .bu-hero--tall   { padding-top: 48px;  padding-bottom: 56px; }
 
   .bu-hero__actions {
     flex-direction: column;
@@ -1421,8 +1421,8 @@ textarea.input { resize: vertical; min-height: 96px; line-height: 1.5; font-fami
   .bu-hero__card { margin-top: 32px; }
 
   /* ── Specialists ───────────────────────────────────────── */
-  .bu-specialists { padding-top: 56px; padding-bottom: 56px; }
-  .bu-specialists__head { gap: 16px; margin-bottom: 32px; }
+  .bu-specialists { padding-top: 40px; padding-bottom: 40px; }
+  .bu-specialists__head { gap: 12px; margin-bottom: 24px; }
 
   .bu-specialist {
     grid-template-columns: 1fr;
@@ -1435,12 +1435,12 @@ textarea.input { resize: vertical; min-height: 96px; line-height: 1.5; font-fami
   .bu-specialist__price-num { font-size: 20px; white-space: nowrap; }
 
   /* ── Included ──────────────────────────────────────────── */
-  .bu-included { padding-bottom: 56px; }
+  .bu-included { padding-bottom: 40px; }
   .bu-included__inner { padding: 28px 20px; gap: 28px; }
   .bu-included__title { font-size: 28px; }
 
   /* ── Reviews ───────────────────────────────────────────── */
-  .bu-reviews { padding-bottom: 56px; }
+  .bu-reviews { padding-bottom: 40px; }
   .bu-reviews__head {
     flex-direction: column;
     align-items: flex-start;
@@ -1450,11 +1450,16 @@ textarea.input { resize: vertical; min-height: 96px; line-height: 1.5; font-fami
   .bu-reviews__rating { align-items: flex-start; }
 
   /* ── FAQ ───────────────────────────────────────────────── */
-  .bu-meta { padding-top: 56px; padding-bottom: 56px; gap: 28px; }
+  .bu-meta { padding-top: 40px; padding-bottom: 40px; gap: 20px; }
   .bu-meta__item { grid-template-columns: 1fr; gap: 4px; }
   .bu-meta__tag  { order: -1; }
 
   /* ── Footer ────────────────────────────────────────────── */
+  .bu-free-band { flex-direction: column; align-items: flex-start; padding: 20px; gap: 14px; margin-top: 28px; }
+  .bu-free-band__text h3 { font-size: 16px; margin: 4px 0 6px; }
+  .bu-free-band__text p  { font-size: 14px; }
+  .bu-free-band .btn     { width: 100%; text-align: center; }
+
   .bu-footer {
     padding-top: 48px;
     grid-template-columns: 1fr 1fr;
@@ -2032,7 +2037,8 @@ async function fetchSlots(specialistId, dateStr) {
   try {
     const res = await fetch(url, { redirect: "follow" });
     const data = await res.json();
-    return Array.isArray(data.slots) ? data.slots : [];
+    if (!Array.isArray(data.slots)) throw new Error(data.error || 'no slots');
+    return data.slots;
   } catch (e) {
     const sp = SPECIALISTS.find(x => x.id === specialistId);
     if (!sp) return [];
