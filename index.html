@@ -646,6 +646,22 @@ textarea.input { resize: vertical; min-height: 96px; line-height: 1.5; font-fami
 }
 .bu-specialist__cta { margin-top: 24px; }
 
+/* Free consultation band */
+.bu-free-band {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  background: #F5F2E8;
+  border: 1px solid #e0dbc8;
+  border-radius: 16px;
+  padding: 32px 40px;
+  margin-top: 40px;
+}
+.bu-free-band__text { flex: 1; }
+.bu-free-band__text h3 { font-size: 20px; font-weight: 700; margin: 6px 0 10px; }
+.bu-free-band__text p { color: var(--fg-2); font-size: 15px; max-width: 460px; line-height: 1.6; }
+
 /* ============================================================
    PRICING / WHAT'S INCLUDED
    ============================================================ */
@@ -1976,6 +1992,25 @@ const SPECIALISTS = [
     nextSlot: "Выбрать в календаре",
     portrait: "olga",
   },
+  {
+    id: "olga_free",
+    calId: "olga",           // routes to Olga's Google Calendar
+    hiddenOnLanding: true,   // shown only in booking modal
+    name: "Ольга Смагина",
+    role: "Знакомство с Бюро · Бесплатно",
+    bio: "Разберём ваш бизнес, подберём подходящий тариф бухгалтерского обслуживания и ответим на все вопросы о сотрудничестве.",
+    credentials: [
+      "Знакомимся с вашим бизнесом и задачами",
+      "Подбираем тариф на бухгалтерское обслуживание",
+      "Отвечаем на все вопросы о сотрудничестве",
+    ],
+    expYears: 15,
+    pricePerHour: 0,
+    workHours: { 1:{start:9,end:18}, 2:{start:12,end:18}, 3:{start:9,end:13}, 4:{start:9,end:18}, 5:{start:9,end:17} },
+    initials: "ОС",
+    nextSlot: "Выбрать в календаре",
+    portrait: "olga",
+  },
 ];
 
 /* deterministic pseudo-busy slots so the calendar feels real */
@@ -2013,7 +2048,7 @@ async function bookOnCalendar({ specialist, date, hour, form }) {
   if (!APPS_SCRIPT_URL) return;
   const iso = fmtDate(date).iso;
   const params = new URLSearchParams({
-    action: "book", specialist: specialist.id,
+    action: "book", specialist: specialist.calId || specialist.id,
     date: iso, hour: String(hour),
     name: form.name, phone: form.phone || "",
     telegram: form.tg || "", comment: form.comment || ""
@@ -2044,6 +2079,7 @@ function generateSlots(specialist, dateStr) {
 }
 
 function fmtPrice(n) {
+  if (n === 0) return "Бесплатно";
   return n.toLocaleString("ru-RU").replace(/,/g, " ") + " ₽";
 }
 
@@ -2200,7 +2236,7 @@ function Hero({ onBook, size = "default" }) {
             <span className="bu-hero__card-title">Ближайшие окна</span>
             <span className="bu-hero__card-status">Когда?</span>
           </div>
-          {SPECIALISTS.map((s) => (
+          {SPECIALISTS.filter(s => !s.hiddenOnLanding).map((s) => (
             <div className="bu-hero__card-row" key={s.id}>
               <div className="bu-hero__card-name">
                 <strong>{s.name}</strong>
@@ -2235,7 +2271,7 @@ function Specialists({ onBook }) {
       </div>
 
       <div className="bu-specialists__grid">
-        {SPECIALISTS.map((s) => (
+        {SPECIALISTS.filter(s => !s.hiddenOnLanding).map((s) => (
           <article className="bu-specialist" key={s.id}>
             <div className="bu-specialist__photo">
               <Portrait who={s.portrait} size={132} height={168} />
@@ -2268,7 +2304,7 @@ function Specialists({ onBook }) {
               </div>
               <div className="bu-specialist__price">
                 <span className="bu-specialist__price-num">{fmtPrice(s.pricePerHour)}</span>
-                <span className="bu-specialist__price-l">за час · минимум 1 час</span>
+                {s.pricePerHour > 0 && <span className="bu-specialist__price-l">за час · минимум 1 час</span>}
               </div>
               <button
                 className="btn btn--outline bu-specialist__cta"
@@ -2279,6 +2315,17 @@ function Specialists({ onBook }) {
             </div>
           </article>
         ))}
+      </div>
+
+      <div className="bu-free-band">
+        <div className="bu-free-band__text">
+          <span className="eyebrow">Бесплатно</span>
+          <h3>Хотите сначала познакомиться с бюро?</h3>
+          <p>Ольга разберёт ваш бизнес, поможет выбрать подходящий тариф бухгалтерского обслуживания и ответит на все вопросы о сотрудничестве — без оплаты.</p>
+        </div>
+        <button className="btn btn--outline" style={{whiteSpace:"nowrap"}} onClick={() => onBook("olga_free")}>
+          Записаться бесплатно →
+        </button>
       </div>
     </section>
   );
@@ -2678,7 +2725,7 @@ function BookingStepWhen({ specialist, today, viewMonth, setViewMonth, date, set
     if (!date || !specialist) { setSlots([]); return; }
     setSlotsLoading(true);
     const iso = fmtDate(date).iso;
-    fetchSlots(specialist.id, iso)
+    fetchSlots(specialist.calId || specialist.id, iso)
       .then(freeHours => {
         const wh = getDayHours(specialist.workHours, iso);
         if (!wh) { setSlots([]); return; }
@@ -2844,7 +2891,7 @@ function BookingStepContact({ specialist, date, hour, form, setForm }) {
         </div>
         <div className="field field--full">
           <label className="field__label">Опишите ситуацию</label>
-          <textarea className="input" rows="4" placeholder="Чтобы специалист подготовился: режим, обороты, что именно беспокоит." value={form.comment} onChange={update("comment")}/>
+          <textarea className="input" rows="4" placeholder={specialist.pricePerHour === 0 ? "Расскажите о вашем бизнесе: сфера деятельности, режим налогообложения, примерный оборот." : "Чтобы специалист подготовился: режим, обороты, что именно беспокоит."} value={form.comment} onChange={update("comment")}/>
           <p className="field__hint">Чем конкретнее — тем полезнее час. Можно тезисами.</p>
         </div>
         <div className="field field--full">
